@@ -22,6 +22,10 @@ const options : DBOptions = {
   database: 'lovelystay_test',
 };
 
+
+
+const username= process.argv[2];
+
 console.info('Connecting to the database:',
   `${options.user}@${options.host}:${options.port}/${options.database}`);
 
@@ -48,7 +52,7 @@ const db = pgp(options);
 
 db.none('CREATE TABLE IF NOT EXISTS github_users (id BIGSERIAL, login TEXT, name TEXT, company TEXT)')
 .then(() => request({
-  uri: 'https://api.github.com/users/gaearon',
+  uri: `https://api.github.com/users/${username}`,
   headers: {
         'User-Agent': 'Request-Promise'
     },
