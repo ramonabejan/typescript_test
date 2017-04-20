@@ -26,6 +26,11 @@ const options : DBOptions = {
 
 const username= process.argv[2];
 
+if(username == undefined) {
+  console.error("Please profide a valid username");
+  process.exit();
+}
+
 console.info('Connecting to the database:',
   `${options.user}@${options.host}:${options.port}/${options.database}`);
 
@@ -50,7 +55,7 @@ interface GithubUsers
 const pgp = pgPromise(pgpDefaultConfig);
 const db = pgp(options);
 
-db.none('CREATE TABLE IF NOT EXISTS github_users  (id BIGSERIAL, login TEXT UNIQUE, name TEXT, company TEXT)')
+db.none('CREATE TABLE IF NOT EXISTS github_users  (id BIGSERIAL, login TEXT UNIQUE, name TEXT, company TEXT, location TEXT, email TEXT)')
 .then(() => request({
   uri: `https://api.github.com/users/${username}`,
   headers: {
@@ -59,6 +64,6 @@ db.none('CREATE TABLE IF NOT EXISTS github_users  (id BIGSERIAL, login TEXT UNIQ
   json: true
 }))
 .then((data: GithubUsers) => db.one(
-  'INSERT INTO github_users (login) VALUES ($[login]) RETURNING id', data)
+  'INSERT INTO github_users (login,name,company,location) VALUES ($[login], $[name],  $[company], $[location]) RETURNING id', data)
 ).then(({id}) => console.log(id))
 .then(() => process.exit(0));
