@@ -8,9 +8,6 @@ const trimLogsSize : number = 200;
 
 //parse command line arguments
 const argv = require('minimist')(process.argv.slice(2));
-
-console.dir(argv);
-
 const username= argv['u'];
 const loc= argv['l'];
 
