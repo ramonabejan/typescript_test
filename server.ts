@@ -55,7 +55,11 @@ const pgpDefaultConfig = {
 };
 
 interface GithubUsers
-  { id : number
+  { id : number,
+    login: string,
+    name: string,
+    company: string,
+    location: string
   };
 
 const pgp = pgPromise(pgpDefaultConfig);
@@ -73,7 +77,7 @@ if(username !== undefined) {
     json: true
   }))
   .then((data: GithubUsers) => db.one(
-    'INSERT INTO github_users (login,name,company,location) VALUES ($[login], $[name],  $[company], $[location]) RETURNING id', data)
+    `INSERT INTO github_users (login,name,company,location) VALUES ('${data.login}', '${data.name}', '${data.company}', '${data.location}') RETURNING id`, data)
   ).then(({id}) => console.log(id))
    .catch(error => {
         console.error(error);
@@ -87,13 +91,13 @@ if(username !== undefined) {
 }
 //show users by location
 if(loc !== undefined) {
-  console.info(`=====GitHub users in ${loc}`)
+  console.info(`========= GitHub users in ${loc} =========`)
   db.each(`SELECT login,name FROM github_users WHERE location LIKE'%${loc}%'`, [], row => {
     row.login += " ";
     ;
   })
-    .then(data => {
-        data.map(result => {
+    .then((data) => {
+        data.map((result:GithubUsers) => {
          console.log(`${result.login}  ${result.name}` );
 
         });
@@ -111,8 +115,8 @@ if(loc !== undefined) {
 
 
 //show stats by location
-var showStats = function() {
-    console.info("======Stats by location: ")
+const showStats = function() {
+    console.info("========= Stats by location =========")
     db.each(`SELECT location,count(login) FROM github_users group by location`, [], row => {
     row.login += " ";
     ;
